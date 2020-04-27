@@ -3,7 +3,7 @@
  * @Date: 2020-04-11 13:21:19
  * @Email: raohong07@163.com
  * @LastEditors: 21克的爱情
- * @LastEditTime: 2020-04-14 20:42:36
+ * @LastEditTime: 2020-04-26 11:01:07
  * @Description: 请求封装
  */
 
@@ -13,9 +13,11 @@ import 'package:http/http.dart' as http;
 import 'package:jokui_video/utils/utils.dart';
 
 
-class HTTPTOOL{
+class HTTP{
   
   static void loadList( String url, {Function success}) async {
+    // http://aa.pianyizhu.net/zhuzhu/?url=https://v.youku.com/v_show/id_XNDYzMTgzNjI2MA==.html
+    // http://aa.pianyizhu.net/zhuzhu/api.php?url=https%3A%2F%2Fv.qq.com%2Fx%2Fcover%2Fmzc00200k12f5gi%2Fp0033qm6ryh.html
     // https://jx.idc126.net/jx/api.php
     // https://v.7cyd.com/vip/api_aa.php
     // String ApiUrl = 'http://8090.ylybz.cn/jiexi2019/api.php';
@@ -41,9 +43,5 @@ class HTTPTOOL{
       success(null);
       print('Request failed with status: ${response.statusCode}.');
     }
-  }
-
-  Future ajax(String url, dynamic data, { String method = 'GET' }) async {
-    await http.get(url);
   }
 }

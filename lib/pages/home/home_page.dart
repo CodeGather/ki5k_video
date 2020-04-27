@@ -1,301 +1,411 @@
 /* 
  * @Author: 21克的爱情
- * @Date: 2020-03-29 09:24:01
+ * @Date: 2020-04-07 13:43:57
  * @Email: raohong07@163.com
  * @LastEditors: 21克的爱情
- * @LastEditTime: 2020-04-23 16:59:22
+ * @LastEditTime: 2020-04-27 11:36:22
  * @Description: 
  */
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flustars/flustars.dart';
 import 'package:flutter/material.dart';
-import 'package:jokui_video/plugins/videoPlugin/src/videoTheme.dart';
-import 'package:jokui_video/utils/utils.dart';
-import 'package:xml_parser/xml_parser.dart';
-
-import 'animation_page.dart';
-import 'home_view_web.dart';
-import 'login_privacy.dart';
-import 'video_page.dart';
+import 'package:flutter_swiper/flutter_swiper.dart';
+import 'dart:convert' as convert;
+import 'package:http/http.dart' as http;
+import 'package:jokui_video/api/Api.dart';
+import 'package:jokui_video/models/video_list.dart';
+import 'package:jokui_video/pages/play/video_page.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+import '../../utils/expand/color.dart';
 
 class HomePage extends StatefulWidget {
+  HomePage({Key key}) : super(key: key);
+
   @override
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin{
-  AnimationController _controller;
-  Animation<EdgeInsets> movement;
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+  List<VideoDetail> listData = [];
+  List<VideoType> tabData = [];
+  SwiperController swiperController = new SwiperController();
+  ScrollController _gridViewController = ScrollController();
+  ScrollController _scrollController = ScrollController();
+  TabController _tabController;
+  bool showTop = false;
 
-  void _initController() {
-    _controller = AnimationController(
-      duration: Duration(milliseconds: 1000),
-      vsync: this,
-    );
-  }
+  RefreshController _refreshController = RefreshController(initialRefresh: true);
+  int pageIndex = 1;
 
-  void _initAni() {
-    movement = EdgeInsetsTween(
-      begin: EdgeInsets.only(top: 0.0, left: 10, right: 10),
-      end: EdgeInsets.only(top: 20.0, left: 10, right: 10),
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Interval( 0, 1, curve: Curves.bounceOut, ),
-      ),
-    )
-    ..addListener(() {
-      setState(() {});
-    })
-    ..addStatusListener((AnimationStatus status) {
-      print('-------$status');
-    });
-  }
-
-  Future _startAnimation() async {
-    try {
-      // await _controller.repeat();
-     await _controller
-         .forward()
-         .orCancel;
-    //  await _controller
-    //      .reverse()
-    //      .orCancel;
-    } on TickerCanceled {
-      print('Animation Failed');
-    }
-  }
-
-  List webVideo = [];
   @override
   void initState() {
     super.initState();
 
-    webVideo = [
-      {'title': '爱奇艺', 'url': 'https://m.iqiyi.com'},
-      {'title': '优酷视频', 'url': 'https://m.youku.com/'},
-      {'title': '腾讯视频', 'url': 'https://m.v.qq.com/index.html'},
-      {'title': 'PP视频', 'url': 'https://m.pptv.com'},
-      {'title': '搜狐视频', 'url': 'https://m.tv.sohu.com'},
-      {'title': '哔哩哔哩', 'url': 'https://m.bilibili.com/index.html'}
-    ];
-    _initController();
-    _initAni();
-    _startAnimation();
+    print('首页');
+    _scrollController.addListener((){
+      int pixels = _scrollController.position.pixels.toInt();
+      print(pixels);
+      if( pixels > 90 && !showTop ){
+        setState(() {
+          showTop = true;
+        });
+      } else if( pixels < 90 && showTop ){
+        setState(() {
+          showTop = false;
+        });
+      }
+    });
   }
 
-  void loadingData() async {
-    final packagePage = await XmlDocument.fromUri('https://pub.flutter-io.cn/packages/xml_parser');
+  void _loadPageData( bool type, int page ) async {
+    // var url = 'https://wechat.ki5k.com/api/video/video/index?limit%20=%2010&page=1';
 
-    if (packagePage == null) {
-      throw ('Failed to load page.');
-    }
-    print(packagePage);
-  }
+    // // Await the http get response, then decode the json-formatted response.
+    // var response = await http.get(url);
+    // if (response.statusCode == 200) {
+    //   var jsonResponse = convert.jsonDecode(response.body);
+    //   setState(() {
+    //     listData = getVideoListList(jsonResponse['data']['list']);
+    //     tabData = getVideoTypeList(jsonResponse['data']['type']);
+    //     _tabController = new TabController(vsync: this, length: tabData.length);
+    //   });
+    // } else {
+    //   print('Request failed with status: ${response.statusCode}.');
+    // }
 
-  @override
-  void dispose() {
-    _controller?.dispose();
-    super.dispose();
+    final typePid = tabData.length > 0 && tabData[_tabController?.index].typePid !=0 ? tabData[_tabController?.index].typeId : '';
+    await Api.getVideoList({
+      'ac': 'list',
+      'pg': page,
+      't': typePid
+    }).then((value){
+      print(value);
+      if( value != null && value['code'] == 1 ){
+        // 获取列表数据
+        setState(() {
+          if(tabData.length ==0 ){
+            tabData = getVideoTypeList(value['class']);//..retainWhere((item)=> item.typePid != 0);
+            _tabController = new TabController(vsync: this, length: tabData.length);
+          }
+          if( type ){
+            listData = getVideoListList(value['list']);
+            pageIndex = 1;
+            _refreshController.refreshCompleted();
+          } else {
+            listData.addAll(getVideoListList(value['list']));
+            _refreshController.loadComplete();
+          }
+        });
+        // 判断获取数据的是否是否满足没有更多数据的情况
+        if( value['pagecount'] == page ){
+          _refreshController.loadNoData();
+        } else {
+          _refreshController.resetNoData();
+        }
+      } else {
+        // 请求失败的情况
+        if( type ){
+          _refreshController.refreshFailed();
+        } else {
+          _refreshController.loadFailed();
+        }
+      }
+    }).catchError((error){});
   }
 
   @override
   Widget build(BuildContext context) {
-    print(movement.value);
-    return Scaffold(
-      drawer: ConstrainedBox(
-        child: Drawer(
-          child: ListView(
-            children: <Widget>[
-              UserAccountsDrawerHeader(
-                accountName: Text("21克的爱情"),
-                accountEmail: Text("raohong07@163.com"),
-                currentAccountPicture: CircleAvatar(
-                  backgroundImage: NetworkImage("http://img8.zol.com.cn/bbs/upload/23765/23764201.jpg"),
-                ),
-                onDetailsPressed: () {
-                  print("!!!!!!!!");
-                }
-              ),
-              ListTile(
-                title: Text("还没想好"),
-                subtitle: Text("这里做点啥呢"),
-                leading: CircleAvatar(
-                  child: Icon(Icons.home),
-                ),
-                onTap: () => print("Title1"),
-              ),
-            ],
-          ),
-        ),
-        constraints: BoxConstraints.expand(width: MediaQuery.of(context).size.width*0.7),
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0xFF9271e2),
-              Theme.of(context).primaryColor,
-            ],
-            begin: FractionalOffset(1, 1),
-            end: FractionalOffset(0, 0),
-          ),
-        ),
-        child: Column(
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                Builder(builder: (BuildContext ctx){
-                  return IconButton(
-                    icon: Icon(
-                      Icons.menu,
-                      color: Colors.white,
-                      size: ScreenUtil.getInstance().getSp(30),
+    return Container(
+      color: Colors.blue[300],
+      child: Scaffold(
+        floatingActionButton: showTop
+            ? InkWell(
+                onTap: () {
+                  print('返回顶部');
+                  _scrollController.animateTo(0.0,
+                      duration: Duration(milliseconds: 100),
+                      curve: Curves.easeIn,);
+                },
+                child: Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor,
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(50),
                     ),
-                    onPressed: (){
-                      print('打开侧边栏');
-                      Scaffold.of(ctx).openDrawer();
-                    }
-                  );
-                }),
-              ],
-            ),
-            Container(
-              margin: EdgeInsets.all( ScreenUtil.getInstance().getWidth(40)),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all( Radius.circular(10) ),
-                      color: Colors.white,
-                    ),
-                    child: Column(
-                      children: <Widget>[
-                        // 标题
-                        Padding(
-                          padding: EdgeInsets.only(
-                            top: ScreenUtil.getInstance().getWidth(15),
+                  ),
+                  child: Icon(
+                    Icons.keyboard_arrow_up,
+                    color: Colors.white,
+                  ),
+                ),
+              )
+            : Container(),
+        body: NestedScrollView(
+          scrollDirection: Axis.vertical,
+          // controller: _scrollController,
+          headerSliverBuilder: (BuildContext context, bool type) {
+            return <Widget>[
+              SliverAppBar(
+                pinned: true,
+                floating: true,
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                    Expanded(
+                        child: InkWell(
+                      onTap: () {
+                        print('打开搜索界面');
+                      },
+                      child: Container(
+                        margin: EdgeInsets.only(right: 15),
+                        padding: EdgeInsets.symmetric(
+                          vertical: 5,
+                          horizontal: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.black12,
+                              Colors.black12,
+                              Colors.black12,
+                            ],
+                            begin: FractionalOffset(1, 0),
+                            end: FractionalOffset(0, 1),
                           ),
-                          child: Text(
-                            'KI5K影视站',
-                            style: TextStyle(
-                              fontSize: ScreenUtil.getInstance().getSp(26),
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                              shadows: [
-                                BoxShadow(
-                                  offset: Offset(0, 1),
-                                  color: Theme.of(context).primaryColor,
-                                  spreadRadius: 10,
-                                  blurRadius: 5,
-                                ),
-                              ],
-                            ),
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(20),
                           ),
                         ),
-                        // 描述
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 20
-                          ),
-                          child: Text(
-                            '欢迎来到ki5k影视站, 在本APP所有资源均来自互联网，并且不存储任何隐私数据，对所有产生的一切涉及法律问题概不负责，尽情知晓！',
-                            textAlign: TextAlign.justify,
-                            style: TextStyle(fontSize: 10),
-                          ),  
-                        )
-                      ], 
-                    ),
-                  ),
-                  // 提示入口
-                  Container(
-                    padding: EdgeInsets.only(
-                      top: 5,
-                      bottom: 15
-                    ),
-                    margin: EdgeInsets.symmetric(
-                      horizontal: 10,
-                    ),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(8),
-                        bottomRight: Radius.circular(8),
-                      ),
-                    ),
-                    child: Text(
-                      '从下面入口进入您需要看视频的站点',
-                      textAlign: TextAlign.justify,
-                      style: TextStyle(fontSize: 12,color:Colors.blue,fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 5 
-                ),
-                child: webVideo.length > 0 ? GridView.builder(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisSpacing: 0, 
-                    mainAxisSpacing: 0,
-                    crossAxisCount: 3,
-                    childAspectRatio: 1.5,
-                  ),
-                  shrinkWrap: true,
-                  itemCount: webVideo.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Container(
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: <Widget>[
-                          Positioned(
-                            top: movement.value.top,
-                            child: SizedBox(
-                              width: ScreenUtil.getInstance().getWidth(110),
-                              height: ScreenUtil.getInstance().getWidth(60),
-                              child: FlatButton(
-                              textColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(Radius.circular(10),),
-                                side: BorderSide(
-                                  color: Color(0xFFF9F3FF), 
-                                  style: BorderStyle.solid, width: 1,
-                                ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Icon(
+                              Icons.search,
+                            ),
+                            Expanded(
+                              child: Center(
+                                child: Text('重生'),
                               ),
-                              onPressed: () {
-                                print('${webVideo[index]["url"]}');
-                                // if(webVideo[index]["url"]=='1'){
-                                //   _controller.forward();
-                                // } else {
-                                  Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-                                    // if(webVideo[index]["url"]=='#'){
-                                    //   return AnimationPage();
-                                    // } else {
-                                      return ViewWebPage(webVideo[index]["url"]);
-                                    // }
-                                    // return NetworkPage();
-                                  }));
-                                // }
+                            ),
+                          ],
+                        ),
+                      ),
+                    )),
+                    InkWell(
+                      onTap: () {
+                        print('打开历史记录');
+                      },
+                      child: Icon(
+                        Icons.timer,
+                      ),
+                    )
+                  ],
+                ),
+                bottom: tabData.length == 0
+                    ? null
+                    : new PreferredSize(
+                        preferredSize: const Size.fromHeight(48.0),
+                        child: Row(
+                          children: <Widget>[
+                            Expanded(
+                              child: TabBar(
+                                isScrollable: true,
+                                controller: _tabController,
+                                tabs: getTabItem,
+                                onTap: (int index){
+                                  print('选中${tabData[index].typeId}');
+                                  setState(() {
+                                    // loadStatus = LoadStatus.SUCCESS;
+                                  });
+                                  _refreshController.requestRefresh();
+                                  // _loadPageData(true, 1,);
+                                },
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () {
+                                print('打开菜单');
                               },
-                              child: Text('${webVideo[index]["title"]}'),
-                            ), 
+                              child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 5, horizontal: 12),
+                                  child: Icon(
+                                    Icons.list,
+                                    color: Colors.white,
+                                  )),
                             )
+                          ],
+                        ),
+                      ),
+              ),
+            ];
+          },
+          body: SmartRefresher(
+            controller: _refreshController,
+            enablePullUp: listData.length != 0,
+            child: listData.length==0 ? Container(
+              child: Center(
+                child: Text('数据加载中...'),
+              ),
+            ) : Container(
+              padding: EdgeInsets.only(top: 5, left: 5, right: 5),
+              child: GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  mainAxisSpacing: 5,
+                  crossAxisSpacing: 5,
+                  childAspectRatio: 0.6,
+                ),
+                physics: NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                controller: _gridViewController,
+                itemCount: listData.length,
+                scrollDirection: Axis.vertical,
+                itemBuilder: (BuildContext context, int index) {
+                  return InkWell(
+                    onTap: () {
+                      print('当前点击${listData[index].vodId}');
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_){
+                          return VideoPage( listData[index].vodId );
+                        })
+                      );
+                    },
+                    child: Container(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Expanded(
+                            child: new CachedNetworkImage(
+                              fit: BoxFit.fill,
+                              placeholder: (context, url) {
+                                return Image.asset(
+                                  'assets/images/loading.png',
+                                  fit: BoxFit.cover,
+                                );
+                              },
+                              imageUrl: listData[index].vodPic ?? 'https://via.placeholder.com/135x180?text=loading',
+                              imageBuilder: (context, imageProvider) {
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.all(Radius.circular(5)),
+                                    image: DecorationImage(
+                                      fit: BoxFit.cover,
+                                      image: imageProvider,
+                                    ),
+                                  ),
+                                  child: listData[index].vodRemarks != null && listData[index].vodRemarks.isNotEmpty ? Stack(
+                                    children: <Widget>[
+                                      Positioned(
+                                        top: 0,
+                                        right: 0,
+                                        child: Container(
+                                          padding: EdgeInsets.all(5),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red,
+                                            borderRadius: BorderRadius.only(
+                                              bottomLeft: Radius.circular(5)
+                                            )
+                                          ),
+                                          child: Text(
+                                            '${listData[index].vodRemarks}',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: ScreenUtil.getInstance().getSp(9)
+                                            )
+                                          ),
+                                        )
+                                      ),
+                                    ],
+                                  ) : null,
+                                );
+                              },
+                            ),
                           ),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              vertical: 10
+                            ),
+                            child: Text(
+                              '${listData[index].vodName}',
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: ScreenUtil.getInstance().getSp(12)
+                              ),
+                            )
+                          )
                         ],
                       ),
-                    );
-                  },
-                ) : Container(),
+                    ),
+                  );
+                },
               ),
             ),
-          ],
+            header: MaterialClassicHeader(
+              color: Colors.red,
+            ),
+            footer: ClassicFooter(
+              loadStyle: LoadStyle.ShowAlways,
+              completeDuration: Duration(milliseconds: 100),
+            ),
+            onRefresh: () async {
+              _loadPageData(true, 1,);
+            },
+            onLoading: () async {
+              // 判断是否可以加载数据
+              if(_refreshController.isLoading){
+                pageIndex++;
+                _loadPageData(false, pageIndex,);
+              }
+            },
+          ),
+          // Column(
+          //   children: <Widget>[
+          //     Container(
+          //       color: Colors.red,
+          //       height: 200,
+          //       child: Swiper(
+          //           // physics: NeverScrollableScrollPhysics(),  // 禁止左右滑动
+          //           itemBuilder: (BuildContext context, int index) {
+          //             switch (index) {
+          //               case 0:
+          //                 return Text('00000');
+          //               case 1:
+          //                 return Text('data');
+          //               default:
+          //                 return Text('33333');
+          //             }
+          //           },
+          //           itemCount: 3,
+          //           scrollDirection: Axis.horizontal,
+          //           loop: true,
+          //           autoplay: true,
+          //           controller: swiperController,
+          //           onIndexChanged: (index) {
+          //             debugPrint("切换下标:$index");
+          //           },
+          //           autoplayDisableOnInteraction: true),
+          //     ),
+          //   ],
+          // ),
         ),
       ),
     );
   }
+
+  List<Widget> get getTabItem {
+    List<Widget> list = [];
+    tabData.forEach((item) {
+      list.add(Tab(
+        child: Text('${item?.typeName}'),
+      ));
+    });
+    return list;
+  }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

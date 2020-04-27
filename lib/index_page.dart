@@ -3,7 +3,7 @@
  * @Date: 2020-03-29 09:24:01
  * @Email: raohong07@163.com
  * @LastEditors: 21克的爱情
- * @LastEditTime: 2020-04-11 22:53:36
+ * @LastEditTime: 2020-04-27 10:20:43
  * @Description: 
  */
 import 'package:flutter/cupertino.dart';
@@ -89,6 +89,7 @@ class _IndexPageState extends State<IndexPage> with SingleTickerProviderStateMix
       ),
       bottomNavigationBar: CupertinoTabBar(
         // elevation: 2,
+        activeColor: Theme.of(context).primaryColor,
         iconSize: 22,
         backgroundColor: Colors.white,
         currentIndex: _currentIndex,

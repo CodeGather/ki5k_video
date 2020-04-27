@@ -3,7 +3,7 @@
  * @Date: 2020-01-26 18:44:34
  * @Email: raohong07@163.com
  * @LastEditors: 21克的爱情
- * @LastEditTime: 2020-04-15 10:59:11
+ * @LastEditTime: 2020-04-26 11:23:51
  * @Description: 
  */
 import 'dart:io';
@@ -40,7 +40,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_)=> ApplicationStatus())
+        ChangeNotifierProvider(create: (_)=> ApplicationStatus()),
       ],
       child: OKToast(
         child: MaterialApp(

@@ -25,6 +25,12 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
+// 添加签名信息
+// def keystorePropertiesFile = rootProject.file("key.properties")
+// def keystoreProperties = new Properties()
+// keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+// end
+
 android {
     compileSdkVersion 28
 
@@ -47,14 +53,14 @@ android {
     }
 
     // 添加签名信息
-    signingConfigs {
-        release {
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
-            storeFile file(keystoreProperties['storeFile'])
-            storePassword keystoreProperties['storePassword']
-        }
-    }
+    // signingConfigs {
+    //     release {
+    //         keyAlias keystoreProperties['keyAlias']
+    //         keyPassword keystoreProperties['keyPassword']
+    //         storeFile file(keystoreProperties['storeFile'])
+    //         storePassword keystoreProperties['storePassword']
+    //     }
+    // }
     // end
 
     buildTypes {
@@ -62,7 +68,7 @@ android {
             ndk {
                abiFilters "armeabi", "armeabi-v7a","arm64-v8a", "x86", "arm64"
             }
-            signingConfig signingConfigs.release
+            signingConfig signingConfigs.debug
         }
         release {
             ndk{

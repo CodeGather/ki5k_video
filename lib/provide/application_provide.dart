@@ -3,7 +3,7 @@
  * @Date: 2020-03-15 08:42:09
  * @Email: raohong07@163.com
  * @LastEditors: 21克的爱情
- * @LastEditTime: 2020-04-15 21:09:35
+ * @LastEditTime: 2020-04-26 11:24:06
  * @Description: 列表状态管理
  */
 
@@ -14,6 +14,8 @@ class ApplicationStatus with ChangeNotifier{
   int clickTime = 0;
   String userData;
   String apiUrl = 'https://jx.688ing.com/parse/op/play';
+
+  double progress = 0.0;
 
   void clearUseData(){
     userData = null;
@@ -48,4 +50,12 @@ class ApplicationStatus with ChangeNotifier{
   
   get isFullScreen => isFullScreenStatus;
 
+
+  // 进度条的使用
+  set setProgress(double data){
+    progress = data;
+    notifyListeners();
+  }
+  
+  get getProgress => progress;
 }

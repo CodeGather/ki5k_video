@@ -3,14 +3,11 @@
  * @Date: 2020-03-29 09:24:01
  * @Email: raohong07@163.com
  * @LastEditors: 21克的爱情
- * @LastEditTime: 2020-04-19 21:44:07
+ * @LastEditTime: 2020-04-26 11:25:54
  * @Description: 
  */
 import 'dart:async';
-import 'dart:convert' as convert;
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:jokui_video/utils/request.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import 'video_page.dart';
@@ -147,6 +144,10 @@ class _ViewWebPageState extends State<ViewWebPage> {
               Navigator.of(context).push(MaterialPageRoute(builder: (_) {
                 return HomeVideoPage(url);
               }));
+              // Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+                
+              //   return ViewWebPage('http://aa.pianyizhu.net/zhuzhu/?url=$url');
+              // }));
             },
             child: const Icon(Icons.play_arrow),
           );

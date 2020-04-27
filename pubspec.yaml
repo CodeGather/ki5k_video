@@ -14,7 +14,7 @@ description: A new Flutter project.
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.6.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -30,13 +30,17 @@ dependencies:
   # m3u8 播放器
   # chewie: ^0.9.10
   webview_flutter: ^0.3.19+5
-  http: ^0.12.0+4
+  # https://github.com/flutterchina/dio
+  dio: ^3.0.9
   cached_network_image: ^2.0.0
   pull_to_refresh: ^1.5.8
   flutter_swiper: ^1.1.6
   # m3u8 播放器
   # video_player: ^0.10.8+1
   flutter_ijkplayer: ^0.3.5+1
+  # 动态权限 https://github.com/baseflowit/flutter-permission-handler
+  permission_handler: ^4.0.0
+  path_provider: ^1.6.0
   # 屏幕适配
   flustars: ^0.2.6+1
   # 解析xml数据
@@ -45,6 +49,11 @@ dependencies:
   provider: ^4.0.5
   # 提示框
   oktoast: ^2.2.0
+  package_info: ^0.4.0+13
+  # 使用第三方软件打开文件 https://github.com/crazecoder/open_file
+  open_file: ^2.0.3
+  # 打电话、打开第三方软件 https://github.com/flutter/plugins/tree/master/packages/url_launcher/url_launcher
+  url_launcher: ^5.4.1
 
 dev_dependencies:
   flutter_test:

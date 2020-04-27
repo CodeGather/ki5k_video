@@ -5,7 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_ijkplayer/flutter_ijkplayer.dart';
 import 'package:jokui_video/models/video_attr.dart';
-import 'package:jokui_video/models/video_detail.dart';
+import 'package:jokui_video/models/video_list.dart';
 import 'package:jokui_video/provide/application_provide.dart';
 import 'package:jokui_video/utils/request.dart';
 import 'package:provider/provider.dart';
@@ -65,7 +65,7 @@ class _HomeVideoPageState extends State<HomeVideoPage> with SingleTickerProvider
 
   loadingData(){
     print(widget.url);
-    HTTPTOOL.loadList(widget.url, success: (data) async {
+    HTTP.loadList(widget.url, success: (data) async {
       if (data != null && data['movieList'] != null ){
         formData( data );
       } else {
@@ -226,15 +226,8 @@ class _HomeVideoPageState extends State<HomeVideoPage> with SingleTickerProvider
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
-                                  Icon(
-                                    Icons.access_alarm,
-                                    color: Color(0xFF2DEDA9),
-                                  ),
                                   Text(
                                     " 扫一扫",
-                                    style: TextStyle(
-                                      color: Colors.white
-                                    ),
                                   ),
                                 ],
                               ), 
@@ -244,15 +237,8 @@ class _HomeVideoPageState extends State<HomeVideoPage> with SingleTickerProvider
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
-                                  Icon(
-                                    Icons.ac_unit,
-                                    color: Color(0xFFF4C152),
-                                  ),
                                   Text(
                                     " 邀请好友",
-                                    style: TextStyle(
-                                      color: Colors.white
-                                    ),
                                   ),
                                 ],
                               ), 
@@ -295,7 +281,7 @@ class _HomeVideoPageState extends State<HomeVideoPage> with SingleTickerProvider
                   padding: EdgeInsets.all(0),
                   children: <Widget>[
                     // 标题 -> 简介
-                    titleItem(left: videoDetail?.title, right: "简介", leftIcon: Icons.title, rightIcon: Icons.arrow_forward_ios),
+                    titleItem(left: videoDetail?.vodName, right: "简介", leftIcon: Icons.title, rightIcon: Icons.arrow_forward_ios),
                     // 线路
                     titleItem(left: "线路", right: "如果播放失败可更换线路重新加载", leftIcon: Icons.line_style, rightSize: 10),
                     // 线路列表
@@ -370,83 +356,83 @@ class _HomeVideoPageState extends State<HomeVideoPage> with SingleTickerProvider
                     //   ),
                     // ),
                     // 选集
-                    titleItem(left: "选集", right: "${videoDetail?.anthology}", leftIcon: Icons.filter_list, rightSize: 10, rightIcon: Icons.arrow_forward_ios, index: 2),
-                    // 选集列表
-                    Container(
-                      height: 50,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: videoDetail?.list?.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return Container(
-                              alignment: Alignment.center,
-                              margin: EdgeInsets.symmetric(
-                                horizontal: 10
-                              ),
-                              child: FlatButton(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.all( Radius.circular(6) ),
-                                  side: BorderSide(
-                                    color: videoDetail?.url == videoDetail?.list[index].url ? Theme.of(context).primaryColor : Colors.grey,
-                                    style: BorderStyle.solid, 
-                                    width: 1
-                                  )
-                                ),
-                                onPressed: () async {
-                                  print('${videoDetail?.list[index].url}');
-                                  await controller.reset(); // 这个方法调用后,会释放所有原生资源,但重新设置dataSource依然可用
-                                  // 网络
-                                  await controller.setNetworkDataSource(videoDetail?.list[index].url);
-                                  setState(() {
-                                    videoDetail?.url = videoDetail?.list[index].url;
-                                    // // 先暂停在继续移除监听
-                                    // _controller.pause();
-                                    // _controller.removeListener((){});
+                    // titleItem(left: "选集", right: "${videoDetail?.anthology}", leftIcon: Icons.filter_list, rightSize: 10, rightIcon: Icons.arrow_forward_ios, index: 2),
+                    // // 选集列表
+                    // Container(
+                    //   height: 50,
+                    //   child: ListView.builder(
+                    //     scrollDirection: Axis.horizontal,
+                    //     itemCount: videoDetail?.list?.length,
+                    //     itemBuilder: (BuildContext context, int index) {
+                    //       return Container(
+                    //           alignment: Alignment.center,
+                    //           margin: EdgeInsets.symmetric(
+                    //             horizontal: 10
+                    //           ),
+                    //           child: FlatButton(
+                    //             shape: RoundedRectangleBorder(
+                    //               borderRadius: BorderRadius.all( Radius.circular(6) ),
+                    //               side: BorderSide(
+                    //                 color: videoDetail?.url == videoDetail?.list[index].url ? Theme.of(context).primaryColor : Colors.grey,
+                    //                 style: BorderStyle.solid, 
+                    //                 width: 1
+                    //               )
+                    //             ),
+                    //             onPressed: () async {
+                    //               print('${videoDetail?.list[index].url}');
+                    //               await controller.reset(); // 这个方法调用后,会释放所有原生资源,但重新设置dataSource依然可用
+                    //               // 网络
+                    //               await controller.setNetworkDataSource(videoDetail?.list[index].url);
+                    //               setState(() {
+                    //                 videoDetail?.url = videoDetail?.list[index].url;
+                    //                 // // 先暂停在继续移除监听
+                    //                 // _controller.pause();
+                    //                 // _controller.removeListener((){});
 
-                                    // // 重新设置video
-                                    // _controller = VideoPlayerController.network(
-                                    //   videoDetail?.list[index].url,
-                                    //   closedCaptionFile: _loadCaptions(),
-                                    // )
-                                    // ..initialize().then((_){
-                                    //   print(_controller.value.aspectRatio);
-                                    //   setState(() {
-                                    //     videoDetail.url = videoDetail?.list[index].url;
-                                    //     videoAspectRatio = _controller.value.aspectRatio;
-                                    //   });
-                                    // })
-                                    // ..addListener(() {
-                                    //   // print('---${_controller}');
-                                    // })
-                                    // ..setLooping(false)
-                                    // ..play();
-                                    // controller.setSpeed(2.0);
+                    //                 // // 重新设置video
+                    //                 // _controller = VideoPlayerController.network(
+                    //                 //   videoDetail?.list[index].url,
+                    //                 //   closedCaptionFile: _loadCaptions(),
+                    //                 // )
+                    //                 // ..initialize().then((_){
+                    //                 //   print(_controller.value.aspectRatio);
+                    //                 //   setState(() {
+                    //                 //     videoDetail.url = videoDetail?.list[index].url;
+                    //                 //     videoAspectRatio = _controller.value.aspectRatio;
+                    //                 //   });
+                    //                 // })
+                    //                 // ..addListener(() {
+                    //                 //   // print('---${_controller}');
+                    //                 // })
+                    //                 // ..setLooping(false)
+                    //                 // ..play();
+                    //                 // controller.setSpeed(2.0);
 
-                                  });
-                                  // var uint8List = await controller.screenShot();
-                                  // var provider = MemoryImage(uint8List);
-                                  // setState(() {
-                                  //   image = Image(image:provider);
-                                  // });
-                                },
-                                child: Text('${videoDetail?.list[index].title}',
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    // 标题 -> 简介
-                    titleItem(left: '简介', leftIcon: Icons.assignment,),
-                    Container(
-                      child: Text(
-                        '${videoDetail?.synopsis}',
-                        textAlign: TextAlign.justify,
-                        style: TextStyle(
-                          fontSize: 15 
-                        ),
-                      ),
-                    ),
+                    //               });
+                    //               // var uint8List = await controller.screenShot();
+                    //               // var provider = MemoryImage(uint8List);
+                    //               // setState(() {
+                    //               //   image = Image(image:provider);
+                    //               // });
+                    //             },
+                    //             child: Text('${videoDetail?.list[index].title}',
+                    //           ),
+                    //         ),
+                    //       );
+                    //     },
+                    //   ),
+                    // ),
+                    // // 标题 -> 简介
+                    // titleItem(left: '简介', leftIcon: Icons.assignment,),
+                    // Container(
+                    //   child: Text(
+                    //     '${videoDetail?.synopsis}',
+                    //     textAlign: TextAlign.justify,
+                    //     style: TextStyle(
+                    //       fontSize: 15 
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ) : statusWidget(loadStatus),
@@ -498,12 +484,12 @@ class _HomeVideoPageState extends State<HomeVideoPage> with SingleTickerProvider
                     borderRadius: BorderRadius.all( Radius.circular(6) ),
                   ),
                   borderSide: BorderSide(
-                    color: videoDetail?.url == videoDetail?.list[index].url ? Theme.of(context).primaryColor : Colors.grey,
+                    // color: videoDetail?.url == videoDetail?.list[index].url ? Theme.of(context).primaryColor : Colors.grey,
                     style: BorderStyle.solid, 
                     width: 1
                   ),
                   child: Text(
-                    '${videoDetail?.list[index].title}',
+                    '',//'${videoDetail?.list[index].title}',
                     textAlign: TextAlign.center,
                     // overflow: TextOverflow.ellipsis,
                   ),
@@ -578,7 +564,7 @@ class _HomeVideoPageState extends State<HomeVideoPage> with SingleTickerProvider
             ),
             onTap: () {
               if( index == 2 ){
-                showBottomSheet(videoDetail?.list);
+                // showBottomSheet(videoDetail?.list);
               }
             },
           )
