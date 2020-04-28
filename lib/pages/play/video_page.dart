@@ -12,9 +12,12 @@ import 'package:jokui_video/utils/request.dart';
 import 'package:provider/provider.dart';
 import 'package:xml_parser/xml_parser.dart';
 
+import '../../utils/expand/string.dart';
+
 class VideoPage extends StatefulWidget {
   final int id;
-  VideoPage(this.id, {Key key}):super(key: key);
+  bool type;
+  VideoPage(this.id, {Key key, this.type = false}):super(key: key);
   @override
   _VideoPageState createState() => _VideoPageState();
 }
@@ -38,6 +41,7 @@ class _VideoPageState extends State<VideoPage> with SingleTickerProviderStateMix
   List<VideoAttr> apiData = [];
   TabController _tabController;
   LoadStatus loadStatus = LoadStatus.LOADING;
+  String playCurrentUrl='';
 
   List<Widget> get getTabItem {
     List<Widget> list = [];
@@ -63,7 +67,69 @@ class _VideoPageState extends State<VideoPage> with SingleTickerProviderStateMix
     super.initState();
 
     if(!mounted) return;
-    formData();
+
+    if( widget.type ){
+      formatData();
+    } else {
+      formData();
+    }
+  }
+
+  void formatData() async {
+    await Api.getSearchDetail({
+      'ac': 'videolist',
+      'ids': widget.id,
+      't':'',
+      'pg':'',
+      'wd': ''
+    }).then((value) async {
+      if( value != null && value.isNotEmpty ){
+        final xmlDocument = XmlDocument.fromString(value);
+        String playUrlStr = XmlCdata.fromString(xmlDocument.getElement('dd').text).value;
+
+        List<VideoAttr> formVideoData = [];
+        if( playUrlStr.indexOf('#') > -1 ){
+          playUrlStr.split('#')..forEach((item){
+            formVideoData.add(VideoAttr.fromJson({
+              'title': item.split('\$')[0],
+              'url': item.split('\$')[1]
+            }));
+          });
+        }
+        setState(() {
+          playCurrentUrl = formVideoData[0].url;
+          videoData = formVideoData;
+          videoDetail = VideoDetail.fromJson({
+            'vod_name': XmlCdata.fromString(xmlDocument.getElement('name').text).value,
+            'vod_id': xmlDocument.getElement('id').text.intParse,
+            'type_id': xmlDocument.getElement('tid').text.intParse,
+            'type': xmlDocument.getElement('type').text,
+            'last': xmlDocument.getElement('last').text,
+            'vod_remarks': XmlCdata.fromString(xmlDocument.getElement('note').text).value,
+            'vod_vod_director': XmlCdata.fromString(xmlDocument.getElement('director').text).value,
+            'vod_actor': XmlCdata.fromString(xmlDocument.getElement('actor').text).value,
+            'vod_content': XmlCdata.fromString(xmlDocument.getElement('des').text).value,
+          });
+          loadStatus = LoadStatus.SUCCESS;
+        });
+        if( formVideoData.length > 0){
+          await controller.setNetworkDataSource(
+            playCurrentUrl,
+            // 'https://www.sample-videos.com/video123/mp4/720/big_buck_bunny_720p_20mb.mp4',
+            // 'rtmp://172.16.100.245/live1',
+            // 'https://www.sample-videos.com/video123/flv/720/big_buck_bunny_720p_10mb.flv',
+            // "https://www.sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
+            // 'http://184.72.239.149/vod/smil:BigBuckBunny.smil/playlist.m3u8',
+            // "file:///sdcard/Download/Sample1.mp4",
+            autoPlay: true
+          );
+        }
+      } else {
+        setState(() {
+          loadStatus = LoadStatus.ERROR;
+        });
+      }
+    });
   }
 
   void formData() async{
@@ -74,35 +140,53 @@ class _VideoPageState extends State<VideoPage> with SingleTickerProviderStateMix
     }).then((value) async {
       if( value != null && value['list'] != null && value['list'].length > 0 ){
         VideoDetail videoDeatil = VideoDetail.fromJson(value['list'][0]);
+        // 获取播放URL
         String playUrl = videoDeatil.vodPlayUrl;
+        // 获取支持播放类型的位置
+        List<String> vodPlayFrom = videoDeatil.vodPlayFrom.split('\$\$\$');
+
         if( playUrl != null && playUrl.isNotEmpty ){
           List<VideoAttr> formVideoData = [];
           List<String> playList = playUrl.split('\$\$\$');
-          playList.forEach((item){
-            if( item.indexOf('m3u8') > -1 ){
-              formVideoData.add(VideoAttr.fromJson({
-                'title': item.split('\$')[0],
-                'url': item.split('\$')[1]
-              }));
+          if( vodPlayFrom.indexOf('ckm3u8') != -1 && playList[vodPlayFrom.indexOf('ckm3u8')] != null && playList[vodPlayFrom.indexOf('ckm3u8')].isNotEmpty ){
+            if( playList[vodPlayFrom.indexOf('ckm3u8')].indexOf('#') > -1 ){
+              playList[vodPlayFrom.indexOf('ckm3u8')].split('#')..forEach((item){
+                formVideoData.add(VideoAttr.fromJson({
+                  'title': item.split('\$')[0],
+                  'url': item.split('\$')[1]
+                }));
+              });
+            } else {
+              playList.forEach((item){
+                if( item.indexOf('m3u8') > -1 ){
+                  formVideoData.add(VideoAttr.fromJson({
+                    'title': item.split('\$')[0],
+                    'url': item.split('\$')[1]
+                  }));
+                }
+              });
             }
-          });
-          setState(() {
-            videoDetail = videoDeatil;
-            videoData = formVideoData;
-            loadStatus = LoadStatus.SUCCESS;
-          });
+            setState(() {
+              playCurrentUrl = formVideoData[0].url;
+              videoDetail = videoDeatil;
+              videoData = formVideoData;
+              loadStatus = LoadStatus.SUCCESS;
+            });
 
-          await controller.setNetworkDataSource(
-            formVideoData[0].url,
-            // 'https://www.sample-videos.com/video123/mp4/720/big_buck_bunny_720p_20mb.mp4',
-            // 'rtmp://172.16.100.245/live1',
-            // 'https://www.sample-videos.com/video123/flv/720/big_buck_bunny_720p_10mb.flv',
-            // "https://www.sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
-            // 'http://184.72.239.149/vod/smil:BigBuckBunny.smil/playlist.m3u8',
-            // "file:///sdcard/Download/Sample1.mp4",
-            autoPlay: true
-          );
-          print("set data source success$formVideoData"); 
+            if( formVideoData.length > 0){
+              await controller.setNetworkDataSource(
+                playCurrentUrl,
+                // 'https://www.sample-videos.com/video123/mp4/720/big_buck_bunny_720p_20mb.mp4',
+                // 'rtmp://172.16.100.245/live1',
+                // 'https://www.sample-videos.com/video123/flv/720/big_buck_bunny_720p_10mb.flv',
+                // "https://www.sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
+                // 'http://184.72.239.149/vod/smil:BigBuckBunny.smil/playlist.m3u8',
+                // "file:///sdcard/Download/Sample1.mp4",
+                autoPlay: true
+              );
+            }
+            print("set data source success$formVideoData"); 
+          }
         }
       } else {
         setState(() {
@@ -202,19 +286,19 @@ class _VideoPageState extends State<VideoPage> with SingleTickerProviderStateMix
                             ),
                           ],
                           onSelected: (String action) async {
-                            switch (action) {
-                              case "scan":
-                                print('扫描点击事件');
+                            // switch (action) {
+                            //   case "scan":
+                            //     print('扫描点击事件');
                                 
-                                break;
-                              case "qcode":
-                                print("qcode");
+                            //     break;
+                            //   case "qcode":
+                            //     print("qcode");
                                 
-                                break;
-                              default:
-                                print("share");
+                            //     break;
+                            //   default:
+                            //     print("share");
                                 
-                            }
+                            // }
                           },
                           onCanceled: () {
                             print("onCanceled");
@@ -329,7 +413,7 @@ class _VideoPageState extends State<VideoPage> with SingleTickerProviderStateMix
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.all( Radius.circular(6) ),
                                   side: BorderSide(
-                                    color: videoData[0].url == videoData[index].url ? Theme.of(context).primaryColor : Colors.grey,
+                                    color: playCurrentUrl == videoData[index].url ? Theme.of(context).primaryColor : Colors.grey,
                                     style: BorderStyle.solid, 
                                     width: 1
                                   )
@@ -338,8 +422,8 @@ class _VideoPageState extends State<VideoPage> with SingleTickerProviderStateMix
                                   print('${videoData[index].url}');
                                   await controller.reset(); // 这个方法调用后,会释放所有原生资源,但重新设置dataSource依然可用
                                   // 网络
-                                  await controller.setNetworkDataSource(videoData[index].url);
                                   setState(() {
+                                    playCurrentUrl = videoData[index].url;
                                     // videoDetail?.url = videoData[index].url;
                                     // // 先暂停在继续移除监听
                                     // _controller.pause();
@@ -365,6 +449,7 @@ class _VideoPageState extends State<VideoPage> with SingleTickerProviderStateMix
                                     // controller.setSpeed(2.0);
 
                                   });
+                                  await controller.setNetworkDataSource(videoData[index].url);
                                   // var uint8List = await controller.screenShot();
                                   // var provider = MemoryImage(uint8List);
                                   // setState(() {
@@ -410,50 +495,57 @@ class _VideoPageState extends State<VideoPage> with SingleTickerProviderStateMix
         )
       ),
       builder: (BuildContext context) {
-        return SafeArea(
-          child: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: ScreenUtil.getInstance().getWidth(10)
-            ),
-            child: GridView.builder(
-              shrinkWrap: true,
-              padding: EdgeInsets.only(
-                top: 10,
-                bottom: 5,
-                left: 1,
-                right: 1,
+        return StatefulBuilder(
+          builder:(stateContext, state) {
+            return SafeArea(
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: ScreenUtil.getInstance().getWidth(10)
               ),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                childAspectRatio: 2.2,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
+              child: GridView.builder(
+                shrinkWrap: true,
+                padding: EdgeInsets.only(
+                  top: 10,
+                  bottom: 5,
+                  left: 1,
+                  right: 1,
+                ),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  childAspectRatio: 2.2,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                ),
+                // physics: NeverScrollableScrollPhysics(),
+                itemCount: data.length,
+                itemBuilder: (BuildContext context, int index){
+                  return OutlineButton(
+                    onPressed: () async {
+                      print('源${index+1}');
+                      setState(() {
+                        playCurrentUrl = videoData[index].url;
+                      });
+                      await controller.setNetworkDataSource(videoData[index].url);
+                    },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all( Radius.circular(6) ),
+                    ),
+                    borderSide: BorderSide(
+                      color: playCurrentUrl == videoData[index].url ? Theme.of(context).primaryColor : Colors.grey,
+                      style: BorderStyle.solid, 
+                      width: 1
+                    ),
+                    child: Text(
+                      '${videoData[index].title}',
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  );
+                },
               ),
-              // physics: NeverScrollableScrollPhysics(),
-              itemCount: data.length,
-              itemBuilder: (BuildContext context, int index){
-                return OutlineButton(
-                  onPressed: (){
-                    print('源${index+1}');
-                  },
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all( Radius.circular(6) ),
-                  ),
-                  borderSide: BorderSide(
-                    color: videoData[0].url == videoData[index].url ? Theme.of(context).primaryColor : Colors.grey,
-                    style: BorderStyle.solid, 
-                    width: 1
-                  ),
-                  child: Text(
-                    '${videoData[index].title}',
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                );
-              },
             ),
-          ),
-        );
+          );
+        });
       },
     );
   }

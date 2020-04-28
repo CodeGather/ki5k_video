@@ -3,7 +3,7 @@
  * @Date: 2020-04-07 13:42:44
  * @Email: raohong07@163.com
  * @LastEditors: 21克的爱情
- * @LastEditTime: 2020-04-07 14:50:28
+ * @LastEditTime: 2020-04-27 15:57:10
  * @Description: 
  */
 
@@ -25,7 +25,9 @@ class _PersonalPageState extends State<PersonalPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-       child: Text('personal'),
+       child: Center(
+         child: Text('敬请期待'),
+       ),
     );
   }
 }

@@ -2,7 +2,7 @@
  * @Author: 21克的爱情
  * @Date: 2020-02-25 13:22:40
  * @LastEditors: 21克的爱情
- * @LastEditTime: 2020-03-26 17:03:25
+ * @LastEditTime: 2020-04-28 13:15:09
  * @Description: String 拓展字段
  */
 
@@ -22,6 +22,19 @@ extension StringExtension on String{
     // 测试
     if(this?.isNotEmpty != true) return false;
     return RegExp(r'^((13[0-9])|(14[5,7,9])|(15[^4])|(18[0-9])|(17[0,1,3,5,6,7,8])|(19)[0-9])\d{8}$').hasMatch(this);
+  }
+
+  /**
+   * @description: 数字字符串转换为int
+   * @param {type} 数字字符串
+   * @return: int
+   */
+  int get intParse{
+    if(RegExp(r'^[0-9]+$').hasMatch(this)){
+      return int.parse(this);
+    } else {
+      return 0;
+    }
   }
 
   /*

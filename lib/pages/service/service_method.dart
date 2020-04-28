@@ -120,7 +120,7 @@ class HttpUtil {
     ));
   }
 
-  ajax(url, {data, method, options, String savePath, FormData formData, cancelToken, Function(int, int) progress, Function success, Function error}) async {
+  ajax(url, {data, method, options, String dataType='json', String savePath, FormData formData, cancelToken, Function(int, int) progress, Function success, Function error}) async {
     Response response;
     dynamic resultData;
     print('请求链接$url');
@@ -144,7 +144,11 @@ class HttpUtil {
             cancelToken: cancelToken,
           );
           if(response.statusCode == 200){
-            return json.decode(response.data);
+            if( dataType == 'json' ){
+              return json.decode(response.data);
+            } else {
+              return response.data;
+            }
           } else {
             return null;
           }

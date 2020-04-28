@@ -156,11 +156,16 @@ class Api {
 //   static Future getCityByRegion(data) async {
 //     return await HttpUtil().get(API_JOKUI_CONFIG + "/getCityByRegionCode", data: data);
 //   }
-//   // 获取某个城市兄弟的信息
-//   static Future getCitySiblingByRegionCode(data) async {
-//     return await HttpUtil().get(API_JOKUI_CONFIG + "/getCitySiblingByRegionCode", data: data);
-//   }
-//   // 获取app版本
+  // 获取某个城市兄弟的信息
+  static Future getSearchData(data) async {
+    return await HttpUtil().ajax("http://cj.okzy.tv/inc/apickm3u8s.php", data: data, method: 'get', dataType: 'xml');
+  }
+  // 获取某个城市兄弟的信息
+  static Future getSearchDetail(data) async {
+    return await HttpUtil().ajax("http://cj.okzy.tv/inc/apickm3u8s.php", data: data, method: 'get', dataType: 'xml');
+  }
+
+  // 获取app版本
   static Future getVideoList(data) async {
     return await HttpUtil().ajax(HOST+'/provide/vod/', data: data, method: 'get');
   }

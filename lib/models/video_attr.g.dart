@@ -17,3 +17,23 @@ Map<String, dynamic> _$VideoAttrToJson(VideoAttr instance) => <String, dynamic>{
       'title': instance.title,
       'url': instance.url,
     };
+
+VideoSearch _$VideoSearchFromJson(Map<String, dynamic> json) {
+  return VideoSearch(
+    json['name'] as String,
+    json['id'] as int,
+    json['tid'] as int,
+    json['type'] as String,
+    json['last'] as String,
+    json['note'] as String,
+  );
+}
+
+Map<String, dynamic> _$VideoSearchToJson(VideoSearch instance) => <String, dynamic>{
+      'title': instance.name,
+      'id': instance.id,
+      'tid': instance.tid,
+      'type': instance.type,
+      'last': instance.last,
+      'note': instance.note,
+    };

@@ -117,7 +117,7 @@ class _AboutPageState extends State<AboutPage> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(15.0),
               child: Image.asset(
-                'assets/images/loading-square.png',
+                'assets/images/logo.png',
                 width: ScreenUtil.getInstance().getWidth(100),
               ),
             )

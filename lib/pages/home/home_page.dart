@@ -3,7 +3,7 @@
  * @Date: 2020-04-07 13:43:57
  * @Email: raohong07@163.com
  * @LastEditors: 21克的爱情
- * @LastEditTime: 2020-04-27 11:36:22
+ * @LastEditTime: 2020-04-28 13:25:05
  * @Description: 
  */
 
@@ -15,6 +15,7 @@ import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
 import 'package:jokui_video/api/Api.dart';
 import 'package:jokui_video/models/video_list.dart';
+import 'package:jokui_video/pages/home/search/search_page.dart';
 import 'package:jokui_video/pages/play/video_page.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../utils/expand/color.dart';
@@ -43,21 +44,22 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     super.initState();
 
     print('首页');
-    _scrollController.addListener((){
-      int pixels = _scrollController.position.pixels.toInt();
-      print(pixels);
-      if( pixels > 90 && !showTop ){
-        setState(() {
-          showTop = true;
-        });
-      } else if( pixels < 90 && showTop ){
-        setState(() {
-          showTop = false;
-        });
-      }
-    });
+    // _scrollController.addListener((){
+    //   int pixels = _scrollController.position.pixels.toInt();
+    //   print(pixels);
+    //   if( pixels > 90 && !showTop ){
+    //     setState(() {
+    //       showTop = true;
+    //     });
+    //   } else if( pixels < 90 && showTop ){
+    //     setState(() {
+    //       showTop = false;
+    //     });
+    //   }
+    // });
   }
 
+  // 加载首页数据
   void _loadPageData( bool type, int page ) async {
     // var url = 'https://wechat.ki5k.com/api/video/video/index?limit%20=%2010&page=1';
 
@@ -145,6 +147,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         body: NestedScrollView(
           scrollDirection: Axis.vertical,
           // controller: _scrollController,
+          physics: NeverScrollableScrollPhysics(),
           headerSliverBuilder: (BuildContext context, bool type) {
             return <Widget>[
               SliverAppBar(
@@ -157,6 +160,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                         child: InkWell(
                       onTap: () {
                         print('打开搜索界面');
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_){
+                            return SearchVideoPage( );
+                          })
+                        );
                       },
                       child: Container(
                         margin: EdgeInsets.only(right: 15),
@@ -185,8 +193,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                               Icons.search,
                             ),
                             Expanded(
-                              child: Center(
-                                child: Text('重生'),
+                              child: Text(
+                                '重生',
+                                style: TextStyle(
+                                  fontSize: 15
+                                ),
                               ),
                             ),
                           ],
@@ -203,49 +214,50 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     )
                   ],
                 ),
-                bottom: tabData.length == 0
-                    ? null
-                    : new PreferredSize(
-                        preferredSize: const Size.fromHeight(48.0),
-                        child: Row(
-                          children: <Widget>[
-                            Expanded(
-                              child: TabBar(
-                                isScrollable: true,
-                                controller: _tabController,
-                                tabs: getTabItem,
-                                onTap: (int index){
-                                  print('选中${tabData[index].typeId}');
-                                  setState(() {
-                                    // loadStatus = LoadStatus.SUCCESS;
-                                  });
-                                  _refreshController.requestRefresh();
-                                  // _loadPageData(true, 1,);
-                                },
-                              ),
-                            ),
-                            InkWell(
-                              onTap: () {
-                                print('打开菜单');
-                              },
-                              child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 5, horizontal: 12),
-                                  child: Icon(
-                                    Icons.list,
-                                    color: Colors.white,
-                                  )),
-                            )
-                          ],
+                bottom: new PreferredSize(
+                  preferredSize: const Size.fromHeight(48.0),
+                  child:  tabData.length == 0 ? Container() : Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: TabBar(
+                          isScrollable: true,
+                          controller: _tabController,
+                          tabs: getTabItem,
+                          onTap: (int index){
+                            print('选中${tabData[index].typeId}');
+                            setState(() {
+                              // loadStatus = LoadStatus.SUCCESS;
+                            });
+                            _refreshController.requestRefresh();
+                            // _loadPageData(true, 1,);
+                          },
                         ),
                       ),
+                      InkWell(
+                        onTap: () {
+                          print('打开菜单');
+                        },
+                        child: Container(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 5, horizontal: 12),
+                            child: Icon(
+                              Icons.list,
+                              color: Colors.white,
+                            )),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ];
           },
           body: SmartRefresher(
             controller: _refreshController,
+            scrollController: _scrollController,
+            
             enablePullUp: listData.length != 0,
             child: listData.length==0 ? Container(
+              padding: EdgeInsets.only(top: 5, left: 5, right: 5),
               child: Center(
                 child: Text('数据加载中...'),
               ),
@@ -258,9 +270,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   crossAxisSpacing: 5,
                   childAspectRatio: 0.6,
                 ),
-                physics: NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
-                controller: _gridViewController,
+                physics: NeverScrollableScrollPhysics(),
                 itemCount: listData.length,
                 scrollDirection: Axis.vertical,
                 itemBuilder: (BuildContext context, int index) {
@@ -344,7 +355,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               ),
             ),
             header: MaterialClassicHeader(
-              color: Colors.red,
+              color: Theme.of(context).primaryColor
             ),
             footer: ClassicFooter(
               loadStyle: LoadStyle.ShowAlways,
@@ -361,40 +372,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               }
             },
           ),
-          // Column(
-          //   children: <Widget>[
-          //     Container(
-          //       color: Colors.red,
-          //       height: 200,
-          //       child: Swiper(
-          //           // physics: NeverScrollableScrollPhysics(),  // 禁止左右滑动
-          //           itemBuilder: (BuildContext context, int index) {
-          //             switch (index) {
-          //               case 0:
-          //                 return Text('00000');
-          //               case 1:
-          //                 return Text('data');
-          //               default:
-          //                 return Text('33333');
-          //             }
-          //           },
-          //           itemCount: 3,
-          //           scrollDirection: Axis.horizontal,
-          //           loop: true,
-          //           autoplay: true,
-          //           controller: swiperController,
-          //           onIndexChanged: (index) {
-          //             debugPrint("切换下标:$index");
-          //           },
-          //           autoplayDisableOnInteraction: true),
-          //     ),
-          //   ],
-          // ),
         ),
       ),
     );
   }
 
+  // 加载tab选项
   List<Widget> get getTabItem {
     List<Widget> list = [];
     tabData.forEach((item) {
