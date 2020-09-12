@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "737793914421",
+    "firebase_url": "https://ki5k-e5467.firebaseio.com",
+    "project_id": "ki5k-e5467",
+    "storage_bucket": "ki5k-e5467.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:737793914421:android:87f0ba9ad6a317ab8a237c",
+        "android_client_info": {
+          "package_name": "com.example.ki5k_video"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "737793914421-7m3bokh5k2ole75kkb7ovh1lmg5ideio.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAptDqmJPwTWMYf3QHk6kySbYuwqal1i2g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "737793914421-7m3bokh5k2ole75kkb7ovh1lmg5ideio.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
