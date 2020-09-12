@@ -1,0 +1,85 @@
+<!--
+ * @Author: 21克的爱情
+ * @Date: 2020-06-19 16:54:05
+ * @Email: raohong07@163.com
+ * @LastEditors: 21克的爱情
+ * @LastEditTime: 2020-06-23 15:26:08
+ * @Description: 
+--> 
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>视频播放</title>
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body class="dplayer-web-fullscreen-fix">
+    <div>
+        <div id="dplayer"></div>
+    </div>
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flv.js/dist/flv.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js/dist/hls.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/dashjs/dist/dash.all.min.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/webtorrent/latest/webtorrent.min.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/pearplayer"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/dplayer@1.26.0/dist/DPlayer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stats.js"></script>
+    <script>
+        // window.addEventListener("flutterInAppWebViewPlatformReady", function(event) {
+        //     console.log("初始化")
+        //     console.log(JSON.stringify(event));
+        //     console.log(JSON.stringify(window.flutter_inappwebview));
+        // });
+        window.appSendJsData = function(url){
+            window.dp = new DPlayer({
+                container: document.getElementById('dplayer'),
+                preload: 'none',
+                autoplay: true,
+                theme: '#FADFA3',
+                loop: true,
+                screenshot: true,
+                airplay: true,
+                hotkey: true,
+                volume: 1,
+                mutex: true,
+                video: {
+                    url: url || 'https://api.dogecloud.com/player/get.mp4?vcode=5ac682e6f8231991&userId=17&ext=.mp4',
+                    pic: 'https://i.loli.net/2019/06/06/5cf8c5d9c57b510947.png',
+                    thumbnails: 'https://i.loli.net/2019/06/06/5cf8c5d9cec8510758.jpg',
+                    type: 'hls',
+                }
+            });
+            // window.dp.fullScreen.request('web');
+            window.dp.on('fullscreen', function () {
+                console.log('fullscreen');
+                window.flutter_inappwebview.callHandler('fullscreen');
+            });
+            window.dp.on('fullscreen_cancel', function () {
+                console.log('fullscreen_cancel');
+                // window.dp.fullScreen.request('web');
+                window.flutter_inappwebview.callHandler('fullscreen_cancel');
+            });
+            // window.dp.on('playing', function () {
+            //     console.log('player playing');
+            // });
+            // window.dp.on('progress', function (data) {
+            //     console.log(dp);
+            // });
+            // <iframe src="example.com" allowfullscreen="allowfullscreen" mozallowfullscreen="mozallowfullscreen" msallowfullscreen="msallowfullscreen" oallowfullscreen="oallowfullscreen" webkitallowfullscreen="webkitallowfullscreen"></iframe>
+        }
+
+        function getUrlKey(name) {
+            var reg = new RegExp('(^|&|\\?)' + name + '=([^&]*)(&|$|\\?)') // 构造一个含有目标参数的正则表达式对象
+            var r = decodeURIComponent(window.location.href).replace(/\+/g, '%20').match(reg) // 匹配目标参数
+            if (r != null) return unescape(r[2])
+            return null // 返回参数值
+        }
+        // window.appSendJsData();
+    </script>
+</body>
+
+</html>

@@ -3,10 +3,12 @@
  * @Date: 2020-04-07 13:56:14
  * @Email: raohong07@163.com
  * @LastEditors: 21克的爱情
- * @LastEditTime: 2020-04-26 17:18:27
+ * @LastEditTime: 2020-09-07 17:31:06
  * @Description: 
  */
-import 'package:json_annotation/json_annotation.dart'; 
+import 'package:json_annotation/json_annotation.dart';
+
+import 'video_attr.dart'; 
   
 part 'video_list.g.dart';
 
@@ -265,7 +267,16 @@ List<VideoDetail> getVideoListList(List<dynamic> list){
   @JsonKey(name: 'type_name')
   String typeName;
 
-  VideoDetail(this.vodId,this.typeId,this.typeId1,this.groupId,this.vodName,this.vodSub,this.vodEn,this.vodStatus,this.vodLetter,this.vodColor,this.vodTag,this.vodClass,this.vodPic,this.vodPicThumb,this.vodPicSlide,this.vodActor,this.vodDirector,this.vodWriter,this.vodBehind,this.vodBlurb,this.vodRemarks,this.vodPubdate,this.vodTotal,this.vodSerial,this.vodTv,this.vodWeekday,this.vodArea,this.vodLang,this.vodYear,this.vodVersion,this.vodState,this.vodAuthor,this.vodJumpurl,this.vodTpl,this.vodTplPlay,this.vodTplDown,this.vodIsend,this.vodLock,this.vodLevel,this.vodCopyright,this.vodPoints,this.vodPointsPlay,this.vodPointsDown,this.vodHits,this.vodHitsDay,this.vodHitsWeek,this.vodHitsMonth,this.vodDuration,this.vodUp,this.vodDown,this.vodScore,this.vodScoreAll,this.vodScoreNum,this.vodTime,this.vodTimeAdd,this.vodTimeHits,this.vodTimeMake,this.vodTrysee,this.vodDoubanId,this.vodDoubanScore,this.vodReurl,this.vodRelVod,this.vodRelArt,this.vodPwd,this.vodPwdUrl,this.vodPwdPlay,this.vodPwdPlayUrl,this.vodPwdDown,this.vodPwdDownUrl,this.vodContent,this.vodPlayFrom,this.vodPlayServer,this.vodPlayNote,this.vodPlayUrl,this.vodDownFrom,this.vodDownServer,this.vodDownNote,this.vodDownUrl,this.typeName,);
+  @JsonKey(name: 'status')
+  bool status;
+
+  @JsonKey(name: 'url')
+  String url;
+
+  @JsonKey(name: 'list')
+  List<VideoAttr> list;
+
+  VideoDetail(this.vodId,this.typeId,this.typeId1,this.groupId,this.vodName,this.vodSub,this.vodEn,this.vodStatus,this.vodLetter,this.vodColor,this.vodTag,this.vodClass,this.vodPic,this.vodPicThumb,this.vodPicSlide,this.vodActor,this.vodDirector,this.vodWriter,this.vodBehind,this.vodBlurb,this.vodRemarks,this.vodPubdate,this.vodTotal,this.vodSerial,this.vodTv,this.vodWeekday,this.vodArea,this.vodLang,this.vodYear,this.vodVersion,this.vodState,this.vodAuthor,this.vodJumpurl,this.vodTpl,this.vodTplPlay,this.vodTplDown,this.vodIsend,this.vodLock,this.vodLevel,this.vodCopyright,this.vodPoints,this.vodPointsPlay,this.vodPointsDown,this.vodHits,this.vodHitsDay,this.vodHitsWeek,this.vodHitsMonth,this.vodDuration,this.vodUp,this.vodDown,this.vodScore,this.vodScoreAll,this.vodScoreNum,this.vodTime,this.vodTimeAdd,this.vodTimeHits,this.vodTimeMake,this.vodTrysee,this.vodDoubanId,this.vodDoubanScore,this.vodReurl,this.vodRelVod,this.vodRelArt,this.vodPwd,this.vodPwdUrl,this.vodPwdPlay,this.vodPwdPlayUrl,this.vodPwdDown,this.vodPwdDownUrl,this.vodContent,this.vodPlayFrom,this.vodPlayServer,this.vodPlayNote,this.vodPlayUrl,this.vodDownFrom,this.vodDownServer,this.vodDownNote,this.vodDownUrl,this.typeName,this.status,this.url,this.list);
 
   factory VideoDetail.fromJson(Map<String, dynamic> srcJson) => _$VideoDetailFromJson(srcJson);
 

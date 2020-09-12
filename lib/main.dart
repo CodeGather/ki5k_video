@@ -3,7 +3,7 @@
  * @Date: 2020-01-26 18:44:34
  * @Email: raohong07@163.com
  * @LastEditors: 21克的爱情
- * @LastEditTime: 2020-04-26 11:23:51
+ * @LastEditTime: 2020-06-25 09:33:37
  * @Description: 
  */
 import 'dart:io';
@@ -22,6 +22,13 @@ void main() {
   if (Platform.isAndroid) {
     SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle(statusBarColor: Colors.transparent);
     SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
+
+    // 显示底部栏(隐藏顶部状态栏)
+    // SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
+    // 显示顶部栏(隐藏底部栏)
+    // SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.top]);
+    // 隐藏底部栏和顶部状态栏
+    // SystemChrome.setEnabledSystemUIOverlays([]);
   }
 
   runApp(MyApp());

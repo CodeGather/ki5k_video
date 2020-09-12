@@ -14,6 +14,7 @@ import 'package:xml_parser/xml_parser.dart';
 
 import '../../provide/application_provide.dart';
 import '../../utils/utils.dart';
+import 'markdown.dart';
 
 class AboutPage extends StatefulWidget {
   AboutPage({Key key}) : super(key: key);
@@ -137,6 +138,11 @@ class _AboutPageState extends State<AboutPage> {
             ),
             onTap: (){
               //_haveNewVersion();
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_){
+                  return MarkDownPage();
+                })
+              );
             },
           ),
         ],

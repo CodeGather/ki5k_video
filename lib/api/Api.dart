@@ -6,7 +6,7 @@ class Api {
 //   static final String AMAP_HOST = "https://restapi.amap.com";
 
 //   // 切换请求的域名地址
-  static final String HOST = "http://movie.ki5k.com/api.php";
+  static final String HOST = "https://movie.ki5k.com/api.php";
 
 //   // 请求的API目录
 //   static final String API_PATH = "/jokui-dali-fast";

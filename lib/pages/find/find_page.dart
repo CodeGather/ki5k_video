@@ -3,7 +3,7 @@
  * @Date: 2020-03-29 09:24:01
  * @Email: raohong07@163.com
  * @LastEditors: 21克的爱情
- * @LastEditTime: 2020-04-26 14:20:27
+ * @LastEditTime: 2020-06-22 15:55:23
  * @Description: 
  */
 import 'package:flustars/flustars.dart';
@@ -112,7 +112,7 @@ class _FindPageState extends State<FindPage> with TickerProviderStateMixin{
 
   @override
   Widget build(BuildContext context) {
-    print(movement.value);
+    // print(movement.value);
     return Scaffold(
       drawer: ConstrainedBox(
         child: Drawer(

@@ -3,7 +3,7 @@
  * @Date: 2020-04-27 16:42:06
  * @Email: raohong07@163.com
  * @LastEditors: 21克的爱情
- * @LastEditTime: 2020-04-28 13:38:32
+ * @LastEditTime: 2020-06-23 17:44:22
  * @Description: 电影搜索页面
  */
 
@@ -33,7 +33,7 @@ class _SearchVideoPageState extends State<SearchVideoPage> {
   void searchData( String searchStr ) async {
     print(searchStr);
     if( searchStr != null && searchStr.isNotEmpty ){
-      await Api.getSearchData({
+      Api.getSearchData({
         'ac': 'list',
         't':'',
         'ids':'',
@@ -85,37 +85,37 @@ class _SearchVideoPageState extends State<SearchVideoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-              // automaticallyImplyLeading: false,
-              // toolbarOpacity: 0,
-              title: Container(
-                padding: EdgeInsets.symmetric(
-                  vertical: 30
+        // automaticallyImplyLeading: false,
+        // toolbarOpacity: 0,
+        title: Container(
+          padding: EdgeInsets.symmetric(
+            vertical: 30
+          ),
+          margin: EdgeInsets.symmetric(
+            vertical: 30
+          ),
+          child: TextFormField(
+            scrollPadding: EdgeInsets.all(0),
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5
                 ),
-                margin: EdgeInsets.symmetric(
-                  vertical: 30
+                hintText: '请输入搜索视频名称',
+                hintStyle: TextStyle(
+                  color: Colors.white
                 ),
-                child: TextFormField(
-                  scrollPadding: EdgeInsets.all(0),
-                    decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5
-                      ),
-                      hintText: '请输入搜索视频名称',
-                      hintStyle: TextStyle(
-                        color: Colors.white
-                      ),
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      disabledBorder: InputBorder.none,
-                      filled: true,
-                      hasFloatingPlaceholder: true,
-                      fillColor: Colors.black12,
-                    ),
-                    autofocus: true,
-                    onChanged: searchData,
-                  ),
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+                filled: true,
+                hasFloatingPlaceholder: true,
+                fillColor: Colors.black12,
               ),
+              autofocus: true,
+              onChanged: searchData,
+            ),
+        ),
       ),
       body: ListView.builder(
         itemCount: listData.length,

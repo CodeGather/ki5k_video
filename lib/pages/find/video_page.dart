@@ -60,7 +60,15 @@ class _HomeVideoPageState extends State<HomeVideoPage> with SingleTickerProvider
     super.initState();
 
     if(!mounted) return;
+    
     loadingData();
+
+    // // 显示底部栏(隐藏顶部状态栏)
+    // SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
+    // // 显示顶部栏(隐藏底部栏)
+    // SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.top]);
+    // // 隐藏底部栏和顶部状态栏
+    // SystemChrome.setEnabledSystemUIOverlays([]);
   }
 
   loadingData(){
@@ -94,21 +102,21 @@ class _HomeVideoPageState extends State<HomeVideoPage> with SingleTickerProvider
     if( data['movieDetails'] != null && data['movieDetails'].length > 0 ){
       final dataArr = data['movieDetails'].map((item){
         List itemMap = item.split('\$');
-        return {
-          "title": "${itemMap[0]}",
-          "url": "${itemMap[1]}",
-        };
+        Map<String, dynamic> data = {};
+        data["title"] = itemMap[0];
+        data["url"] = itemMap[1];
+        return data;
       }).toList();
 
-      print(dataArr);
+      // print(dataArr);
 
       setState(() {
         _tabController = new TabController(vsync: this, length: dataArr.length);
         loadStatus = LoadStatus.SUCCESS;
         videoDetail = VideoDetail.fromJson({
-          'title': title,
+          'vod_name': title,
           'url': data['videoUrl'],
-          'anthology': updateDesc, // 选集
+          'vod_actor': updateDesc, // 选集
           'synopsis': '暂无', // 简介
           'list': dataArr
         });
@@ -121,16 +129,16 @@ class _HomeVideoPageState extends State<HomeVideoPage> with SingleTickerProvider
         }]);
       });
 
-      await controller.setNetworkDataSource(
-        data['videoUrl'],
-        // 'https://www.sample-videos.com/video123/mp4/720/big_buck_bunny_720p_20mb.mp4',
-        // 'rtmp://172.16.100.245/live1',
-        // 'https://www.sample-videos.com/video123/flv/720/big_buck_bunny_720p_10mb.flv',
-//              "https://www.sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
-        // 'http://184.72.239.149/vod/smil:BigBuckBunny.smil/playlist.m3u8',
-        // "file:///sdcard/Download/Sample1.mp4",
-        autoPlay: true
-      );
+//       await controller.setNetworkDataSource(
+//         data['videoUrl'],
+//         // 'https://www.sample-videos.com/video123/mp4/720/big_buck_bunny_720p_20mb.mp4',
+//         // 'rtmp://172.16.100.245/live1',
+//         // 'https://www.sample-videos.com/video123/flv/720/big_buck_bunny_720p_10mb.flv',
+// //              "https://www.sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
+//         // 'http://184.72.239.149/vod/smil:BigBuckBunny.smil/playlist.m3u8',
+//         // "file:///sdcard/Download/Sample1.mp4",
+//         autoPlay: true
+//       );
       print("set data source success");
       
       // _controller = VideoPlayerController.network(
@@ -158,13 +166,17 @@ class _HomeVideoPageState extends State<HomeVideoPage> with SingleTickerProvider
 
   @override
   void dispose() {
-    controller?.dispose();
+    // controller?.dispose();
+    SystemChrome.restoreSystemUIOverlays();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     ApplicationStatus fullScreenStatus = Provider.of<ApplicationStatus>(context);
+
+    
+
     return Scaffold(
       body: Container(
         color: Colors.white,
@@ -177,11 +189,11 @@ class _HomeVideoPageState extends State<HomeVideoPage> with SingleTickerProvider
                   width: double.infinity,
                   color: Colors.black,
                   child:  Container(
-                          // height: 400, // 这里随意
-                          child: IjkPlayer(
-                            mediaController: controller,
-                          ),
-                        )// : statusWidget(loadStatus, type: false),
+                    // height: 400, // 这里随意
+                    child: IjkPlayer(
+                      mediaController: controller
+                    ),
+                  )// : statusWidget(loadStatus, type: false),
                 ),
                 // 返回头部
                 Positioned(
@@ -308,6 +320,10 @@ class _HomeVideoPageState extends State<HomeVideoPage> with SingleTickerProvider
                               print('源${apiData[index]?.url}');
                               SpUtil.putString( "api", apiData[index]?.url );
                               print('源${SpUtil.getString('api')}');
+                              // 显示底部栏(隐藏顶部状态栏)
+                              SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
+                              // 显示顶部栏(隐藏底部栏)
+                              SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.top]);
                             },
                             child: Text(
                               '${apiData[index]?.title}',
@@ -356,72 +372,72 @@ class _HomeVideoPageState extends State<HomeVideoPage> with SingleTickerProvider
                     //   ),
                     // ),
                     // 选集
-                    // titleItem(left: "选集", right: "${videoDetail?.anthology}", leftIcon: Icons.filter_list, rightSize: 10, rightIcon: Icons.arrow_forward_ios, index: 2),
-                    // // 选集列表
-                    // Container(
-                    //   height: 50,
-                    //   child: ListView.builder(
-                    //     scrollDirection: Axis.horizontal,
-                    //     itemCount: videoDetail?.list?.length,
-                    //     itemBuilder: (BuildContext context, int index) {
-                    //       return Container(
-                    //           alignment: Alignment.center,
-                    //           margin: EdgeInsets.symmetric(
-                    //             horizontal: 10
-                    //           ),
-                    //           child: FlatButton(
-                    //             shape: RoundedRectangleBorder(
-                    //               borderRadius: BorderRadius.all( Radius.circular(6) ),
-                    //               side: BorderSide(
-                    //                 color: videoDetail?.url == videoDetail?.list[index].url ? Theme.of(context).primaryColor : Colors.grey,
-                    //                 style: BorderStyle.solid, 
-                    //                 width: 1
-                    //               )
-                    //             ),
-                    //             onPressed: () async {
-                    //               print('${videoDetail?.list[index].url}');
-                    //               await controller.reset(); // 这个方法调用后,会释放所有原生资源,但重新设置dataSource依然可用
-                    //               // 网络
-                    //               await controller.setNetworkDataSource(videoDetail?.list[index].url);
-                    //               setState(() {
-                    //                 videoDetail?.url = videoDetail?.list[index].url;
-                    //                 // // 先暂停在继续移除监听
-                    //                 // _controller.pause();
-                    //                 // _controller.removeListener((){});
+                    titleItem(left: "选集", right: "${videoDetail?.vodActor}", leftIcon: Icons.filter_list, rightSize: 10, rightIcon: Icons.arrow_forward_ios, index: 2),
+                    // 选集列表
+                    Container(
+                      height: 50,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: videoDetail?.list?.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Container(
+                              alignment: Alignment.center,
+                              margin: EdgeInsets.symmetric(
+                                horizontal: 10
+                              ),
+                              child: FlatButton(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.all( Radius.circular(6) ),
+                                  side: BorderSide(
+                                    color: videoDetail?.url == videoDetail?.list[index].url ? Theme.of(context).primaryColor : Colors.grey,
+                                    style: BorderStyle.solid, 
+                                    width: 1
+                                  )
+                                ),
+                                onPressed: () async {
+                                  print('${videoDetail?.list[index].url}');
+                                  await controller.reset(); // 这个方法调用后,会释放所有原生资源,但重新设置dataSource依然可用
+                                  // 网络
+                                  await controller.setNetworkDataSource(videoDetail?.list[index].url);
+                                  setState(() {
+                                    videoDetail?.url = videoDetail?.list[index].url;
+                                    // // 先暂停在继续移除监听
+                                    // _controller.pause();
+                                    // _controller.removeListener((){});
 
-                    //                 // // 重新设置video
-                    //                 // _controller = VideoPlayerController.network(
-                    //                 //   videoDetail?.list[index].url,
-                    //                 //   closedCaptionFile: _loadCaptions(),
-                    //                 // )
-                    //                 // ..initialize().then((_){
-                    //                 //   print(_controller.value.aspectRatio);
-                    //                 //   setState(() {
-                    //                 //     videoDetail.url = videoDetail?.list[index].url;
-                    //                 //     videoAspectRatio = _controller.value.aspectRatio;
-                    //                 //   });
-                    //                 // })
-                    //                 // ..addListener(() {
-                    //                 //   // print('---${_controller}');
-                    //                 // })
-                    //                 // ..setLooping(false)
-                    //                 // ..play();
-                    //                 // controller.setSpeed(2.0);
+                                    // // 重新设置video
+                                    // _controller = VideoPlayerController.network(
+                                    //   videoDetail?.list[index].url,
+                                    //   closedCaptionFile: _loadCaptions(),
+                                    // )
+                                    // ..initialize().then((_){
+                                    //   print(_controller.value.aspectRatio);
+                                    //   setState(() {
+                                    //     videoDetail.url = videoDetail?.list[index].url;
+                                    //     videoAspectRatio = _controller.value.aspectRatio;
+                                    //   });
+                                    // })
+                                    // ..addListener(() {
+                                    //   // print('---${_controller}');
+                                    // })
+                                    // ..setLooping(false)
+                                    // ..play();
+                                    // controller.setSpeed(2.0);
 
-                    //               });
-                    //               // var uint8List = await controller.screenShot();
-                    //               // var provider = MemoryImage(uint8List);
-                    //               // setState(() {
-                    //               //   image = Image(image:provider);
-                    //               // });
-                    //             },
-                    //             child: Text('${videoDetail?.list[index].title}',
-                    //           ),
-                    //         ),
-                    //       );
-                    //     },
-                    //   ),
-                    // ),
+                                  });
+                                  // var uint8List = await controller.screenShot();
+                                  // var provider = MemoryImage(uint8List);
+                                  // setState(() {
+                                  //   image = Image(image:provider);
+                                  // });
+                                },
+                                child: Text('${videoDetail?.list[index].title}',
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                     // // 标题 -> 简介
                     // titleItem(left: '简介', leftIcon: Icons.assignment,),
                     // Container(
@@ -518,7 +534,7 @@ class _HomeVideoPageState extends State<HomeVideoPage> with SingleTickerProvider
             margin: EdgeInsets.only(
               top: ScreenUtil.getInstance().getWidth(30),
             ),
-            child: Text('${status == LoadStatus.ERROR ? '视频解析失败了\n请尝试点击其他集重新解析':'加载中...'}'),
+            child: Text('${status == LoadStatus.ERROR ? '        视频解析失败了\n请返回重新选中第几集后\n            重新解析':'加载中...'}'),
           ):Container()
         ], 
       ),
@@ -564,7 +580,7 @@ class _HomeVideoPageState extends State<HomeVideoPage> with SingleTickerProvider
             ),
             onTap: () {
               if( index == 2 ){
-                // showBottomSheet(videoDetail?.list);
+                showBottomSheet(videoDetail?.list);
               }
             },
           )

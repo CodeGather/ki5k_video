@@ -31,6 +31,7 @@ enum LoadStatus{
 
 class _VideoPageState extends State<VideoPage> with SingleTickerProviderStateMixin{
   IjkMediaController controller = IjkMediaController();
+  final key = GlobalKey<DefaultIJKControllerWidgetState>();
   double videoAspectRatio = 1.5;
   double dx=0.0;
   double dy=0.0;
@@ -97,7 +98,7 @@ class _VideoPageState extends State<VideoPage> with SingleTickerProviderStateMix
           });
         }
         setState(() {
-          playCurrentUrl = formVideoData[0].url;
+          playCurrentUrl = "https://youku.cdn7-okzy.com/20200530/19802_7ff6f2f4/index.m3u8";//formVideoData[0].url;
           videoData = formVideoData;
           videoDetail = VideoDetail.fromJson({
             'vod_name': XmlCdata.fromString(xmlDocument.getElement('name').text).value,
@@ -121,8 +122,10 @@ class _VideoPageState extends State<VideoPage> with SingleTickerProviderStateMix
             // "https://www.sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
             // 'http://184.72.239.149/vod/smil:BigBuckBunny.smil/playlist.m3u8',
             // "file:///sdcard/Download/Sample1.mp4",
-            autoPlay: true
+            autoPlay: false
           );
+          key.currentState.fullScreen();
+          IjkManager.setLandScape();
         }
       } else {
         setState(() {
@@ -167,7 +170,7 @@ class _VideoPageState extends State<VideoPage> with SingleTickerProviderStateMix
               });
             }
             setState(() {
-              playCurrentUrl = formVideoData[0].url;
+              playCurrentUrl = "https://youku.cdn7-okzy.com/20200530/19802_7ff6f2f4/index.m3u8";//formVideoData[0].url;
               videoDetail = videoDeatil;
               videoData = formVideoData;
               loadStatus = LoadStatus.SUCCESS;
@@ -182,8 +185,10 @@ class _VideoPageState extends State<VideoPage> with SingleTickerProviderStateMix
                 // "https://www.sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
                 // 'http://184.72.239.149/vod/smil:BigBuckBunny.smil/playlist.m3u8',
                 // "file:///sdcard/Download/Sample1.mp4",
-                autoPlay: true
+                autoPlay: false
               );
+              key.currentState.fullScreen();
+              IjkManager.setLandScape();
             }
             print("set data source success$formVideoData"); 
           }
@@ -195,6 +200,8 @@ class _VideoPageState extends State<VideoPage> with SingleTickerProviderStateMix
       }
     });
   }
+
+
 
   @override
   void dispose() {
@@ -220,6 +227,10 @@ class _VideoPageState extends State<VideoPage> with SingleTickerProviderStateMix
                           // height: 400, // 这里随意
                           child: IjkPlayer(
                             mediaController: controller,
+                             controllerWidgetBuilder: (ctl) => DefaultIJKControllerWidget(
+                              controller: ctl,
+                              key: key,
+                            ),
                           ),
                         )// : statusWidget(loadStatus, type: false),
                 ),

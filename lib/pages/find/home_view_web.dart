@@ -3,11 +3,12 @@
  * @Date: 2020-03-29 09:24:01
  * @Email: raohong07@163.com
  * @LastEditors: 21克的爱情
- * @LastEditTime: 2020-04-26 11:25:54
+ * @LastEditTime: 2020-06-22 18:02:31
  * @Description: 
  */
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:jokui_video/pages/play/video_play_page.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import 'video_page.dart';
@@ -142,12 +143,8 @@ class _ViewWebPageState extends State<ViewWebPage> {
             onPressed: () async {
               String url = await controller.data.currentUrl();
               Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-                return HomeVideoPage(url);
+                return VideoPlayPage(55512);
               }));
-              // Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-                
-              //   return ViewWebPage('http://aa.pianyizhu.net/zhuzhu/?url=$url');
-              // }));
             },
             child: const Icon(Icons.play_arrow),
           );

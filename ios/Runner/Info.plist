@@ -104,8 +104,6 @@
 	<string>需要您同意才能使用麦克风以便完成录像等，您确定允许吗?</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>需要您同意才能使用图片库以便完成图片选择功能，您确定允许吗?</string>
-  <key>kTCCServiceMediaLibrary</key>
-  <string>需要您的同意才能访问媒体资料库，您确定允许吗?</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
@@ -131,5 +129,7 @@
 	<true/>
 	<key>io.flutter.embedded_views_preview</key>
 	<true/>
+	<key>kTCCServiceMediaLibrary</key>
+	<string>需要您的同意才能访问媒体资料库，您确定允许吗?</string>
 </dict>
 </plist>
